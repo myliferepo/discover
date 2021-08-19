@@ -1,0 +1,84 @@
+<html>
+    <head>
+        <title>Cypto JS test for AES 256 CBC with Pkcs5/7</title>
+    </head>
+    <body>
+        <script type="text/javascript" src="<path_to_cryptojs>/crypto-js/crypto-js.js"></script>
+        <script type="text/javascript">
+
+            // 64 Hexadecimal characters (32 bytes or 256 bits)
+            // This is the secret key shared offline with a partner
+            var keyHexStr= CryptoJS.enc.Hex.parse('1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF');
+            
+            const randomHexString = (length = 32) => {
+                // Declare all characters
+                let chars = 'ABCDEF0123456789';
+
+                // Pick characers randomly
+                let str = '';
+                for (let i = 0; i < length; i++) {
+                    str += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+
+                return str;
+
+            };
+
+            function encrypt(word, key, inve) {
+                var ciphertext = CryptoJS.AES.encrypt(word, key, {
+                        mode: CryptoJS.mode.CBC,
+                        padding: CryptoJS.pad.Pkcs7,
+                        iv: inve,
+                    });
+                return ciphertext.toString();
+            }
+            function decrypt(word, key, inve){  
+                var decrypt = CryptoJS.AES.decrypt(word, key, {
+                        mode: CryptoJS.mode.CBC,
+                        padding: CryptoJS.pad.Pkcs7,
+                        iv: inve,
+                    });     
+                return CryptoJS.enc.Utf8.stringify(decrypt).toString();  
+            } 
+
+
+            function encryptValues(){
+                let Console = document.getElementById('consoleSection');
+                var firstName = document.getElementById('firstName');
+                var lastName = document.getElementById('lastName');
+                var location = document.getElementById('location');
+
+                // IV is a 32 Hexadecimal characters (16 bytes)
+                // This values needs to be passed in the API call 
+         
+                var hexiv = document.getElementById('hexIV');
+
+                var iv = CryptoJS.enc.Hex.parse(hexiv.value);
+
+                var encFirstName = encrypt(firstName.value, keyHexStr, iv );
+                var encLastName = encrypt(lastName.value, keyHexStr, iv );
+                var encLocation = encrypt(location.value, keyHexStr, iv );
+
+                Console.innerHTML = "first name: "+encFirstName+"<BR>last name: "+encLastName+"<BR>location: "+encLocation;
+            }
+
+            function generateIV(){
+                var ivHexStr=randomHexString(32);
+                var inputHexIV = document.getElementById('hexIV');
+                
+                inputHexIV.value = ivHexStr;
+            }
+        </script>
+        <div>
+            <h1>Cypto JS test for AES 256 CBC with Pkcs5/7</h1>
+            <p>*All fields required</p>
+        </div>
+
+        <div>First Name:<input type="text" id="firstName"></div>
+        <div>Last Name:<input type="text" id="lastName"></div>
+        <div>Location:<input type="text" id="location"></div>
+        <div>Hex IV:<input type="text" id="hexIV" size="36"><input type="button" value="Generate IV" onclick="generateIV()">Paste or generate an hex (32 Length) initialization vector</div>
+        <div><input type="button" id="encrypt" onclick="encryptValues()" value="Encrypt"></div>
+        <div style="font-family: monospace" id="consoleSection"></div>
+    </body>
+</html>
